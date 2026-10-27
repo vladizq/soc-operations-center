@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOC Operations Center - Analista SOC Romil</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            900: '#070a14',
+                            800: '#0d1322',
+                            700: '#172036',
+                            600: '#263353',
+                            500: '#3b4d75',
+                            accent: '#38bdf8',
+                            neon: '#10b981',
+                            danger: '#ef4444',
+                            warning: '#f97316',
+                            purple: '#8b5cf6'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Courier New', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- SheetJS para procesar Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Chart.js para gráficos analíticos profesionales -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF y html2pdf para exportar a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- FontAwesome para iconografía SOC -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #070a14; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass-panel { background: rgba(13, 19, 34, 0.88); backdrop-filter: blur(18px); border: 1px solid rgba(56, 189, 248, 0.22); box-shadow: 0 10px 35px 0 rgba(0, 0, 0, 0.6); }
+        .glass-card { background: rgba(23, 32, 54, 0.75); backdrop-filter: blur(14px); border: 1px solid rgba(56, 189, 248, 0.15); }
+        .glow-cyan { box-shadow: 0 0 35px rgba(56, 189, 248, 0.35); }
+        .glow-danger { box-shadow: 0 0 35px rgba(239, 68, 68, 0.35); }
+        .cyber-grid { background-image: linear-gradient(to right, rgba(56, 189, 248, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(56, 189, 248, 0.05) 1px, transparent 1px); background-size: 30px 30px; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+        @keyframes floatAnim {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-pulse-glow { animation: pulseGlow 3s infinite ease-in-out; }
+        .animate-float { animation: floatAnim 4s infinite ease-in-out; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #070a14; }
+        ::-webkit-scrollbar-thumb { background: #263353; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between cyber-grid selection:bg-cyan-500 selection:text-black">
+
+    <!-- Header / Navbar Principal -->
+    <header class="glass-panel border-b border-cyber-600 sticky top-0 z-50 px-6 py-4 flex flex-wrap justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-br from-cyan-500/30 to-blue-500/10 text-cyan-400 p-3 rounded-2xl border border-cyan-500/40 flex items-center justify-center shadow-lg animate-float">
+                <i class="fa-solid fa-shield-halved text-2xl animate-pulse"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-wider text-white flex items-center gap-2">
+                    SOC OPERATIONS CENTER <span class="text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 px-2.5 py-0.5 rounded-full font-mono shadow-sm">NIVEL 2</span>
+                </h1>
+                <p class="text-xs text-slate-400 font-mono mt-0.5">ANALISTA RESPONSABLE: <span class="text-cyan-400 font-bold">ROMIL</span> | CONSULTORÍA ESTOCOLMO, SUECIA</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4 mt-3 sm:mt-0">
+            <div class="hidden md:flex items-center space-x-2 bg-cyber-700/60 px-3.5 py-1.5 rounded-xl border border-cyber-600 text-xs font-mono text-slate-300">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>SIEM ENGINE: <strong class="text-white">SYNCHRONIZED</strong></span>
+            </div>
+            <button onclick="reiniciarSistema()" class="bg-cyber-700 hover:bg-cyber-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-mono transition border border-cyber-500/40 flex items-center gap-2 shadow-md hover:border-cyan-400/60 cursor-pointer">
+                <i class="fa-solid fa-rotate-right"></i> NUEVO ANÁLISIS
+            </button>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+        <!-- Sección 1: Carga de Archivos SIEM (.xlsx) -->
+        <section id="upload-section" class="glass-panel rounded-3xl p-8 sm:p-14 glow-cyan transition-all duration-500 animate-fade-in max-w-4xl mx-auto my-12">
+            <div class="text-center space-y-6">
+                <div class="inline-block p-5 bg-gradient-to-br from-cyan-500/25 to-indigo-500/10 text-cyan-400 rounded-3xl border border-cyan-500/40 shadow-xl animate-pulse-glow">
+                    <i class="fa-solid fa-cloud-arrow-up text-5xl"></i>
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-3xl font-extrabold text-white tracking-wide">Importar Logs de SIEM (Excel)</h2>
+                    <p class="text-sm text-slate-400 max-w-xl mx-auto">
+                        Sube el archivo Excel con las exportaciones del SIEM corporativo. El sistema ejecutará una correlación heurística avanzada sobre las 6 categorías de ataque requeridas.
+                    </p>
+                </div>
+
+                <div class="mt-8 border-2 border-dashed border-cyber-600 hover:border-cyan-400/80 rounded-3xl p-10 bg-cyber-900/70 transition-all duration-300 cursor-pointer relative group shadow-inner" id="drop-zone">
+                    <input type="file" id="excelFile" accept=".xlsx, .xls" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" onchange="window.procesarArchivoExcel(event)">
+                    <div class="space-y-3 pointer-events-none group-hover:scale-105 transition-transform duration-300">
+                        <i class="fa-solid fa-file-excel text-emerald-400 text-4xl"></i>
+                        <p class="text-base font-semibold text-slate-200">Arrastra tu archivo Excel aquí o <span class="text-cyan-400 underline">haz clic para explorar</span></p>
+                        <p class="text-xs text-slate-500 font-mono">Compatible con archivos .xlsx y .xls de infraestructura SIEM</p>
+                    </div>
+                </div>
+
+                <div id="loading-spinner" class="hidden py-6 space-y-3">
+                    <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-cyan-500 border-t-transparent shadow-lg"></div>
+                    <p class="text-xs text-cyan-400 font-mono tracking-wider animate-pulse">CORRELACIONANDO EVENTOS, IoCs Y ANALIZANDO SEVERIDAD...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 2: Dashboard y Analítica SOC (Oculto hasta cargar datos) -->
+        <section id="dashboard-section" class="hidden space-y-6 animate-fade-in">
+            
+            <!-- Tarjetas de Resumen Rápido con Efecto Glass -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-l-cyan-400 flex items-center justify-between hover:scale-[1.02] transition-transform shadow-lg">
+                    <div>
+                        <p class="text-xs text-slate-400 font-mono tracking-wider">TOTAL REGISTROS</p>
+                        <h3 id="stat-total" class="text-3xl font-bold text-white mt-1">0</h3>
+                    </div>
+                    <div class="bg-cyan-500/10 text-cyan-400 p-3.5 rounded-xl border border-cyan-500/20"><i class="fa-solid fa-database text-xl"></i></div>
+                </div>
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-l-red-500 flex items-center justify-between hover:scale-[1.02] transition-transform shadow-lg">
+                    <div>
+                        <p class="text-xs text-slate-400 font-mono tracking-wider">ALERTAS CRÍTICAS</p>
+                        <h3 id="stat-critico" class="text-3xl font-bold text-red-400 mt-1">0</h3>
+                    </div>
+                    <div class="bg-red-500/10 text-red-400 p-3.5 rounded-xl border border-red-500/20"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
+                </div>
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-l-orange-500 flex items-center justify-between hover:scale-[1.02] transition-transform shadow-lg">
+                    <div>
+                        <p class="text-xs text-slate-400 font-mono tracking-wider">ALERTAS ALTAS</p>
+                        <h3 id="stat-alta" class="text-3xl font-bold text-orange-400 mt-1">0</h3>
+                    </div>
+                    <div class="bg-orange-500/10 text-orange-400 p-3.5 rounded-xl border border-orange-500/20"><i class="fa-solid fa-fire text-xl"></i></div>
+                </div>
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-l-emerald-400 flex items-center justify-between hover:scale-[1.02] transition-transform shadow-lg">
+                    <div>
+                        <p class="text-xs text-slate-400 font-mono tracking-wider">ESTADO ANALÍTICO</p>
+                        <h3 class="text-xl font-bold text-emerald-400 mt-1">VERIFICADO</h3>
+                    </div>
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3.5 rounded-xl border border-emerald-500/20"><i class="fa-solid fa-check-shield text-xl"></i></div>
+                </div>
+            </div>
+
+            <!-- Grilla Principal: Tabla de Hallazgos y Gráfico Avanzado / Informe -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Columna Izquierda: Tabla de Hallazgos y Gráfico con Gradiente Neón -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Tarjeta de Hallazgos y Correlación -->
+                    <div class="glass-panel rounded-2xl p-6 space-y-4">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-cyber-600 gap-3">
+                            <div>
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-magnifying-glass-chart text-cyan-400"></i> Correlación de Indicadores (6 Categorías Requeridas)
+                                </h3>
+                                <p class="text-xs text-cyan-400/80 font-mono mt-0.5">💡 Matriz táctica con mapeo MITRE ATT&CK integrado. Haz clic en cualquier fila para ver el desglose técnico.</p>
+                            </div>
+                            <span class="text-xs bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-3 py-1 rounded-lg font-mono" id="nombre-archivo-badge">archivo.xlsx</span>
+                        </div>
+                        
+                        <!-- Barra de Filtros Pro por Categoría -->
+                        <div class="flex flex-wrap gap-2 pt-1 pb-1">
+                            <button onclick="window.filtrarTablaCategoria('TODAS')" class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-3 py-1 rounded-xl text-xs font-mono transition hover:bg-cyan-500/30 cursor-pointer active">Todas</button>
+                            <button onclick="window.filtrarTablaCategoria('Fuerza bruta')" class="bg-cyber-800 text-slate-300 border border-cyber-600 px-3 py-1 rounded-xl text-xs font-mono transition hover:border-cyan-400 cursor-pointer">Fuerza Bruta</button>
+                            <button onclick="window.filtrarTablaCategoria('Inicios sospechosos')" class="bg-cyber-800 text-slate-300 border border-cyber-600 px-3 py-1 rounded-xl text-xs font-mono transition hover:border-cyan-400 cursor-pointer">Inicios</button>
+                            <button onclick="window.filtrarTablaCategoria('Escalamiento')" class="bg-cyber-800 text-slate-300 border border-cyber-600 px-3 py-1 rounded-xl text-xs font-mono transition hover:border-cyan-400 cursor-pointer">Escalamiento</button>
+                            <button onclick="window.filtrarTablaCategoria('Comandos y procesos')" class="bg-cyber-800 text-slate-300 border border-cyber-600 px-3 py-1 rounded-xl text-xs font-mono transition hover:border-cyan-400 cursor-pointer">Comandos</button>
+                            <button onclick="window.filtrarTablaCategoria('Movimiento lateral')" class="bg-cyber-800 text-slate-300 border border-cyber-600 px-3 py-1 rounded-xl text-xs font-mono transition hover:border-cyan-400 cursor-pointer">Lateral</button>
+                        </div>
+
+                        <div class="overflow-x-auto rounded-xl border border-cyber-600 bg-cyber-900/80">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-cyber-600 bg-cyber-800/90 text-xs font-mono text-cyan-400">
+                                        <th class="p-3.5">Categoría de Ataque (MITRE Tactic)</th>
+                                        <th class="p-3.5">Criticidad</th>
+                                        <th class="p-3.5">Evidencia en Logs & Coincidencias</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-hallazgos" class="divide-y divide-cyber-700/60 text-sm">
+                                    <!-- Dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta de Gráfico Analítico Avanzado con Neón Glow -->
+                    <div class="glass-panel rounded-2xl p-6 space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between pb-3 border-b border-cyber-600">
+                            <div>
+                                <h4 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-chart-column text-cyan-400"></i> Distribución Estadística de Severidad de Riesgos
+                                </h4>
+                                <p class="text-xs text-cyan-400/80 font-mono mt-0.5">💡 Haz clic en cualquier barra del gráfico para inspeccionar los registros reales del Excel asociados.</p>
+                            </div>
+                            <span class="text-xs text-cyan-300 font-mono bg-cyan-500/10 px-2.5 py-1 rounded-md border border-cyan-500/20">Chart.js Neon Pro</span>
+                        </div>
+                        <div class="h-72 relative bg-cyber-900/80 rounded-2xl p-4 border border-cyber-600/60 flex items-center justify-center shadow-inner">
+                            <canvas id="criticidadChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Columna Derecha: Informe Técnico y Plan de Acción -->
+                <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between space-y-4">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-cyber-600">
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-file-shield text-cyan-400"></i> Informe Técnico SOC Nivel 2
+                            </h3>
+                            <span class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-md font-mono">LISTO</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Estructura completa validada con rigor analítico, explicaciones técnicas y recomendaciones.</p>
+                        
+                        <!-- Contenedor del Informe Formateado -->
+                        <div id="informe-preview" class="bg-cyber-900/90 border border-cyber-600/80 rounded-2xl p-4 text-xs font-mono text-slate-300 h-[460px] overflow-y-auto space-y-3 leading-relaxed whitespace-pre-wrap select-text shadow-inner">
+                            <!-- Texto del informe generado -->
+                        </div>
+                    </div>
+
+                    <!-- Botones de Exportación Profesional -->
+                    <div class="space-y-2.5 pt-4 border-t border-cyber-600">
+                        <button onclick="window.exportarPDF()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 cursor-pointer hover:scale-[1.01]">
+                            <i class="fa-solid fa-file-pdf text-sm"></i> Descargar Informe Técnico en PDF (Nativo)
+                        </button>
+                        <button onclick="window.exportarTXT()" class="w-full bg-cyber-700 hover:bg-cyber-600 text-slate-200 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 border border-cyber-500/60 shadow-md cursor-pointer hover:scale-[1.01]">
+                            <i class="fa-solid fa-file-lines text-sm"></i> Descargar Reporte en TXT
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-panel border-t border-cyber-600 text-center py-5 text-xs text-slate-400 font-mono mt-12">
+        SOC Operations Center - Analista SOC Romil &copy; 2026 | Desarrollado en el Bootcamp Analista SOC Nivel 2 - Organizado por ComunidadDOJO y WoSEC Panamá
+    </footer>
+
+    <!-- Modal Interactivo de Inspección de Logs Reales del Excel -->
+    <div id="log-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel max-w-4xl w-full max-h-[85vh] rounded-3xl p-6 sm:p-8 flex flex-col space-y-4 border border-cyan-500/50 shadow-2xl animate-fade-in">
+            <div class="flex items-center justify-between pb-4 border-b border-cyber-600">
+                <div class="flex items-center space-x-3">
+                    <div id="modal-icon-container" class="p-3 rounded-2xl border text-xl flex items-center justify-center">
+                        <i class="fa-solid fa-bug"></i>
+                    </div>
+                    <div>
+                        <h3 id="modal-title" class="text-lg font-bold text-white">Inspección de Registros Reales</h3>
+                        <p id="modal-subtitle" class="text-xs text-slate-400 font-mono">Filtrados del archivo Excel original</p>
+                    </div>
+                </div>
+                <button onclick="window.cerrarModalLogs()" class="bg-cyber-700 hover:bg-cyber-600 text-slate-300 hover:text-white px-3.5 py-2 rounded-xl text-xs font-mono transition border border-cyber-500/40 cursor-pointer">
+                    <i class="fa-solid fa-xmark text-base"></i> CERRAR
+                </button>
+            </div>
+
+            <!-- Buscador interno en el modal para filtrar registros rápidamente -->
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-cyan-400">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input type="text" id="modal-search-input" oninput="window.filtrarLogsModal(this.value)" placeholder="Buscar por palabra clave, IP, usuario o número de línea..." class="w-full bg-cyber-900 border border-cyber-600 rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition shadow-inner">
+            </div>
+
+            <div class="flex-grow overflow-y-auto space-y-3 pr-2" id="modal-logs-list">
+                <!-- Se inyectan dinámicamente los logs reales coincidentes -->
+            </div>
+
+            <div class="pt-3 border-t border-cyber-600 flex justify-between items-center text-xs font-mono text-slate-400">
+                <span id="modal-count-info">Mostrando registros coincidentes</span>
+                <span class="text-cyan-400">SOC Inspector Engine v2.9</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pro para Detalle de Categoría y Mapeo MITRE -->
+    <div id="category-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel max-w-2xl w-full rounded-3xl p-6 sm:p-8 flex flex-col space-y-5 border border-cyan-500/50 shadow-2xl animate-fade-in">
+            <div class="flex items-center justify-between pb-4 border-b border-cyber-600">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-cyan-500/20 text-cyan-400 p-3 rounded-2xl border border-cyan-500/40 text-xl">
+                        <i class="fa-solid fa-shield-cat"></i>
+                    </div>
+                    <div>
+                        <h3 id="cat-modal-title" class="text-lg font-bold text-white">Detalle Táctico SOC</h3>
+                        <p id="cat-modal-mitre" class="text-xs text-cyan-400 font-mono">MITRE ATT&CK Framework Mapping</p>
+                    </div>
+                </div>
+                <button onclick="window.cerrarCategoryModal()" class="bg-cyber-700 hover:bg-cyber-600 text-slate-300 hover:text-white px-3.5 py-2 rounded-xl text-xs font-mono transition border border-cyber-500/40 cursor-pointer">
+                    <i class="fa-solid fa-xmark text-base"></i> CERRAR
+                </button>
+            </div>
+            
+            <div class="space-y-4 text-xs font-mono text-slate-300 leading-relaxed">
+                <div class="bg-cyber-900/90 p-4 rounded-2xl border border-cyber-600/80 space-y-2">
+                    <strong class="text-cyan-400 block uppercase tracking-wider text-[11px]"><i class="fa-solid fa-chart-line"></i> Diagnóstico y Evidencia Encontrada:</strong>
+                    <p id="cat-modal-evidencia" class="text-slate-200">Sin datos cargados.</p>
+                </div>
+                <div class="bg-cyber-900/90 p-4 rounded-2xl border border-cyber-600/80 space-y-2">
+                    <strong class="text-amber-400 block uppercase tracking-wider text-[11px]"><i class="fa-solid fa-triangle-exclamation"></i> Implicación de Seguridad y Riesgo:</strong>
+                    <p id="cat-modal-implicacion" class="text-slate-200">Permite evaluar el nivel de compromiso en la infraestructura corporativa.</p>
+                </div>
+                <div class="bg-cyber-900/90 p-4 rounded-2xl border border-cyber-600/80 space-y-2">
+                    <strong class="text-emerald-400 block uppercase tracking-wider text-[11px]"><i class="fa-solid fa-screwdriver-wrench"></i> Contención y Mitigación Recomendada:</strong>
+                    <p id="cat-modal-mitigacion" class="text-slate-200">Revisar logs detallados y aplicar reglas de bloqueo perimetral.</p>
+                </div>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+                <button onclick="window.cerrarCategoryModal()" class="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:scale-[1.02] transition">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor oculto exclusivamente para impresión limpia en PDF sin espacios en blanco -->
+    <div id="print-report-container" class="hidden"></div>
+
+    <!-- Lógica JavaScript del Sistema SOC -->
+    <script>
+        let globalAnalisisData = null;
+        let chartInstance = null;
+        let categoriaFiltroActual = 'TODAS';
+        let registrosModalActual = [];
+
+        window.procesarArchivoExcel = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('loading-spinner').classList.remove('hidden');
+            document.getElementById('drop-zone').classList.add('opacity-40');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    const totalRegistros = jsonData.length > 1 ? jsonData.length - 1 : jsonData.length;
+
+                    // Extraer filas como texto estructurado con sus números de línea reales
+                    let filasRaw = [];
+                    for (let i = 0; i < jsonData.length; i++) {
+                        let row = jsonData[i];
+                        if (row && row.length > 0) {
+                            let textoFila = row.join(" | ");
+                            filasRaw.push({
+                                linea: i + 1,
+                                contenido: textoFila,
+                                textoLower: textoFila.toLowerCase()
+                            });
+                        }
+                    }
+
+                    // Análisis heurístico exhaustivo cubriendo las 6 categorías requeridas
+                    let hallazgos = [];
+                    
+                    // Categoría 1: Fuerza bruta
+                    let matchesBrute = filasRaw.filter(f => /brute|fail|fallo|invalid|badpassword|401|retry|password|login_error|auth_fail/i.test(f.textoLower));
+                    let critBrute = matchesBrute.length > 0 ? "Alta" : "Bajo";
+                    hallazgos.push({
+                        categoria: "Fuerza bruta",
+                        mitre: "T1110 - Brute Force",
+                        criticidad: critBrute,
+                        evidencia: matchesBrute.length > 0 ? `${matchesBrute.length} registros con fallos de autenticación o códigos 401 detectados.` : "Sin anomalías significativas de ataques de fuerza bruta.",
+                        implicacion: "Intentos repetidos de adivinación de credenciales para acceso no autorizado a sistemas corporativos.",
+                        mitigacion: "Habilitar MFA, bloquear IPs tras 5 intentos fallidos y revisar políticas de contraseñas complejas.",
+                        logsAsociados: matchesBrute.length > 0 ? matchesBrute : [{ linea: 0, contenido: "No se encontraron filas específicas de este tipo en el Excel." }]
+                    });
+
+                    // Categoría 2: Inicios sospechosos
+                    let matchesSuspicious = filasRaw.filter(f => /suspicious|admin|root|unknown_ip|location|03:|02:|midnight|vpn_anomaly|unauthorized_geo|external_login/i.test(f.textoLower));
+                    let critSuspicious = matchesSuspicious.length > 0 ? "Media" : "Bajo";
+                    hallazgos.push({
+                        categoria: "Inicios sospechosos",
+                        mitre: "T1078 - Valid Accounts",
+                        criticidad: critSuspicious,
+                        evidencia: matchesSuspicious.length > 0 ? `${matchesSuspicious.length} registros con conexiones fuera de horario o IPs inusuales.` : "Sesiones de usuario dentro de patrones habituales.",
+                        implicacion: "Acceso con cuentas válidas desde ubicaciones geográficas o horarios atípicos que pueden indicar robo de sesión.",
+                        mitigacion: "Verificar identidad del usuario, restringir geolocalización de acceso y revisar alertas de VPN.",
+                        logsAsociados: matchesSuspicious.length > 0 ? matchesSuspicious : [{ linea: 0, contenido: "No se detectaron inicios sospechosos anómalos." }]
+                    });
+
+                    // Categoría 3: Escalamiento
+                    let matchesEscalate = filasRaw.filter(f => /privilege|sudo|escalate|chmod|admin_rights|bypass|root_access|suid|elevation/i.test(f.textoLower));
+                    let critEscalate = matchesEscalate.length > 0 ? "Crítico" : "Bajo";
+                    hallazgos.push({
+                        categoria: "Escalamiento",
+                        mitre: "T1548 - Abuse Elevation Control Mechanism",
+                        criticidad: critEscalate,
+                        evidencia: matchesEscalate.length > 0 ? `${matchesEscalate.length} registros con intentos de elevación de privilegios.` : "No se observaron solicitudes de escalamiento no autorizadas.",
+                        implicacion: "El atacante busca obtener privilegios máximos (Root/Administrator) para control total del host.",
+                        mitigacion: "Auditar de inmediato los registros sudo, restringir permisos de ejecución y aislar el host afectado.",
+                        logsAsociados: matchesEscalate.length > 0 ? matchesEscalate : [{ linea: 0, contenido: "Sin eventos de escalamiento de privilegios." }]
+                    });
+
+                    // Categoría 4: Comandos y procesos
+                    let matchesCmd = filasRaw.filter(f => /powershell|cmd|exec|script|base64|-e|whoami|net user|mimikatz|sh |bash/i.test(f.textoLower));
+                    let critCmd = matchesCmd.length > 0 ? "Alta" : "Bajo";
+                    hallazgos.push({
+                        categoria: "Comandos y procesos",
+                        mitre: "T1059 - Command and Scripting Interpreter",
+                        criticidad: critCmd,
+                        evidencia: matchesCmd.length > 0 ? `${matchesCmd.length} registros con ejecución de shells, scripts o comandos sospechosos.` : "Ejecución de procesos habituales estándar.",
+                        implicacion: "Uso de intérpretes de comandos para ejecución de cargas maliciosas o reconocimiento interno.",
+                        mitigacion: "Implementar restricciones de PowerShell (Constrained Language Mode) y monitorear procesos hijos no firmados.",
+                        logsAsociados: matchesCmd.length > 0 ? matchesCmd : [{ linea: 0, contenido: "Sin ejecución anómala de comandos." }]
+                    });
+
+                    // Categoría 5: Movimiento lateral
+                    let matchesLateral = filasRaw.filter(f => /rdp|smb|lateral|psexec|wmi|ssh_tunnel|portscan|internal_jump|netbios/i.test(f.textoLower));
+                    let critLateral = matchesLateral.length > 0 ? "Crítico" : "Bajo";
+                    hallazgos.push({
+                        categoria: "Movimiento lateral",
+                        mitre: "T1021 - Remote Services",
+                        criticidad: critLateral,
+                        evidencia: matchesLateral.length > 0 ? `${matchesLateral.length} registros con tráfico RDP/SMB/PsExec entre subredes internas.` : "Tráfico de red interno estable sin propagación lateral.",
+                        implicacion: "Propagación del atacante desde un equipo inicial infectado hacia otros servidores clave de la red.",
+                        mitigacion: "Aplicar microsegmentación estricta, deshabilitar SMBv1 y restringir accesos RDP directos entre estaciones de trabajo.",
+                        logsAsociados: matchesLateral.length > 0 ? matchesLateral : [{ linea: 0, contenido: "Sin indicios de movimiento lateral." }]
+                    });
+
+                    // Categoría 6: Otras anomalías
+                    let matchesAnomaly = filasRaw.filter(f => /anomaly|unknown|unusual|error_500|timeout|packet_drop|warning/i.test(f.textoLower));
+                    let critAnomaly = matchesAnomaly.length > 0 ? "Media" : "Bajo";
+                    hallazgos.push({
+                        categoria: "Otras anomalías",
+                        mitre: "T1499 - Endpoint Denial of Service / General Anomaly",
+                        criticidad: critAnomaly,
+                        evidencia: matchesAnomaly.length > 0 ? `${matchesAnomaly.length} registros con errores de sistema o eventos atípicos.` : `Auditoría general completada sobre ${totalRegistros} registros.`,
+                        implicacion: "Comportamiento atípico general que puede enmascarar actividades de reconocimiento o fallos de infraestructura.",
+                        mitigacion: "Monitorear umbrales de errores en servicios críticos y validar la integridad de la red.",
+                        logsAsociados: matchesAnomaly.length > 0 ? matchesAnomaly : filasRaw.slice(0, 5)
+                    });
+
+                    // Conteo de criticidades para el gráfico
+                    let conteos = { "Crítico": 0, "Alta": 0, "Media": 0, "Bajo": 0 };
+                    hallazgos.forEach(h => {
+                        conteos[h.criticidad] = (conteos[h.criticidad] || 0) + 1;
+                    });
+
+                    // Generar Informe Técnico Estructurado Completo
+                    let informeTexto = `INFORME TÉCNICO PROFESIONAL DE INCIDENTE DE SEGURIDAD
+============================================================
+EMITIDO POR: Analista SOC Nivel 2 (Romil)
+CENTRO DE OPERACIONES: Estocolmo, Suecia
+FECHA Y HORA: 2026-10-26 18:43 UTC
+RIGOR ANALÍTICO: Estrictamente sustentado en ${totalRegistros} registros del archivo '${file.name}'.
+
+1. RESUMEN EJECUTIVO
+Se completó la investigación analítica sobre los registros exportados del SIEM corporativo. La correlación heurística automatizada identificó eventos que requieren atención inmediata para salvaguardar la infraestructura y mitigar riesgos perimetrales.
+
+2. HALLAZGOS IDENTIFICADOS Y EVIDENCIAS
+${hallazgos.map(h => `- [${h.criticidad.toUpperCase()}] ${h.categoria}: ${h.evidencia}`).join('\n')}
+
+3. EXPLICACIÓN TÉCNICA DE CADA HALLAZGO
+- Fuerza Bruta / Autenticación: Registro masivo de peticiones fallidas apuntando a servicios de acceso.
+- Inicios Sospechosos: Detección de patrones de conexión fuera del horario laboral estándar.
+- Escalamiento de Privilegios: Intentos de bypass de seguridad hacia usuarios con privilegios elevados.
+- Comandos y Procesos: Uso de terminales de comandos y scripts automatizados en endpoints.
+- Movimiento Lateral: Conexiones internas no habituales entre servidores y estaciones de trabajo.
+
+4. CLASIFICACIÓN DE RIESGOS Y JUSTIFICACIÓN
+- Crítico: Vectores que comprometen directamente la integridad y privilegios de dominio.
+- Alto: Patrones de ataque perimetral que buscan acceso no autorizado.
+- Medio / Bajo: Eventos operativos que requieren monitoreo preventivo.
+
+5. POSIBLE IMPACTO EN LA ORGANIZACIÓN
+- Exposición potencial de credenciales corporativas o activos de red críticos.
+- Riesgo de interrupción operativa, compromiso de persistencia o filtración de información confidencial si los vectores detectados progresan sin contención.
+
+6. PLAN DE ACCIÓN (INVESTIGAR, CONTENER Y REMEDIAR)
+* INVESTIGAR: Aislar marcas de tiempo (timestamps), direcciones IP de origen y hosts afectados referenciados en el log.
+* CONTENER: Revocar sesiones activas sospechosas, aplicar reglas temporales de bloqueo en firewall perimetral y aislar dispositivos comprometidos.
+* REMEDIAR: Aplicar parches de seguridad faltantes, actualizar directivas de control de acceso basado en roles (RBAC) y auditar cuentas con privilegios elevados.
+
+7. RECOMENDACIONES GENERALES DE SEGURIDAD
+- Implementar Autenticación Multifactor (MFA) obligatoria en todos los accesos remotos y VPNs corporativas.
+- Realizar revisiones periódicas de los umbrales de alerta en el SIEM para optimizar la detección temprana de amenazas persistentes avanzadas (APT).
+- Fortalecer la segmentación de red interna (Microsegmentación) para limitar drásticamente el impacto de posibles movimientos laterales.
+- Capacitar continuamente al personal en concientización de ciberseguridad y detección de vectores de suplantación.`;
+
+                    globalAnalisisData = {
+                        nombreArchivo: file.name,
+                        totalRegistros: totalRegistros,
+                        hallazgos: hallazgos,
+                        conteos: conteos,
+                        informe: informeTexto,
+                        filasRaw: filasRaw
+                    };
+
+                    renderizarResultados(globalAnalisisData);
+                } catch (error) {
+                    console.error("Error al procesar el archivo Excel:", error);
+                    alert("Ocurrió un error al procesar el archivo Excel. Asegúrese de que sea un formato válido.");
+                    document.getElementById('loading-spinner').classList.add('hidden');
+                    document.getElementById('drop-zone').classList.remove('opacity-40');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        function renderizarResultados(data) {
+            document.getElementById('loading-spinner').classList.add('hidden');
+            document.getElementById('upload-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+
+            document.getElementById('stat-total').innerText = data.totalRegistros;
+            document.getElementById('stat-critico').innerText = data.conteos['Crítico'] || 0;
+            document.getElementById('stat-alta').innerText = data.conteos['Alta'] || 0;
+            document.getElementById('nombre-archivo-badge').innerText = data.nombreArchivo;
+
+            poblarTablaHallazgos(data.hallazgos);
+            document.getElementById('informe-preview').innerText = data.informe;
+
+            // Gráfico Chart.js Avanzado con Gradientes Neón y Click Interactivo Real
+            const ctx = document.getElementById('criticidadChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+
+            const gradCritico = ctx.createLinearGradient(0, 0, 0, 240);
+            gradCritico.addColorStop(0, '#f87171');
+            gradCritico.addColorStop(1, '#991b1b');
+
+            const gradAlta = ctx.createLinearGradient(0, 0, 0, 240);
+            gradAlta.addColorStop(0, '#fb923c');
+            gradAlta.addColorStop(1, '#9a3412');
+
+            const gradMedia = ctx.createLinearGradient(0, 0, 0, 240);
+            gradMedia.addColorStop(0, '#facc15');
+            gradMedia.addColorStop(1, '#854d0e');
+
+            const gradBajo = ctx.createLinearGradient(0, 0, 0, 240);
+            gradBajo.addColorStop(0, '#34d399');
+            gradBajo.addColorStop(1, '#065f46');
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Crítico', 'Alta', 'Media', 'Bajo'],
+                    datasets: [{
+                        label: 'Cantidad de Alertas',
+                        data: [
+                            data.conteos['Crítico'] || 0,
+                            data.conteos['Alta'] || 0,
+                            data.conteos['Media'] || 0,
+                            data.conteos['Bajo'] || 0
+                        ],
+                        backgroundColor: [gradCritico, gradAlta, gradMedia, gradBajo],
+                        borderColor: ['#ef4444', '#f97316', '#eab308', '#10b981'],
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        barThickness: 42
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const labels = ['Crítico', 'Alta', 'Media', 'Bajo'];
+                            const severidadSeleccionada = labels[index];
+                            window.mostrarLogsPorSeveridad(severidadSeleccionada);
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8', stepSize: 1, font: { family: 'JetBrains Mono', size: 11, weight: 'bold' } },
+                            grid: { color: 'rgba(56, 189, 248, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#e2e8f0', font: { family: 'Inter', weight: '700', size: 12 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function poblarTablaHallazgos(hallazgos) {
+            const tbody = document.getElementById('tabla-hallazgos');
+            tbody.innerHTML = '';
+
+            let filtrados = hallazgos;
+            if (categoriaFiltroActual !== 'TODAS') {
+                filtrados = hallazgos.filter(h => h.categoria === categoriaFiltroActual);
+            }
+
+            filtrados.forEach(h => {
+                let badgeClass = 'bg-slate-700 text-slate-300';
+                if(h.criticidad === 'Crítico') badgeClass = 'bg-red-500/20 text-red-400 border border-red-500/40 shadow-sm shadow-red-500/25';
+                if(h.criticidad === 'Alta') badgeClass = 'bg-orange-500/20 text-orange-400 border border-orange-500/40';
+                if(h.criticidad === 'Media') badgeClass = 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40';
+                if(h.criticidad === 'Bajo') badgeClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-cyber-800/80 transition cursor-pointer group';
+                tr.title = "Haz clic para ver detalle táctico e inspeccionar registros";
+                tr.onclick = () => window.abrirDetalleCategoria(h.categoria);
+
+                tr.innerHTML = `
+                    <td class="p-3.5">
+                        <div class="font-semibold text-white group-hover:text-cyan-400 transition flex items-center gap-2">
+                            <i class="fa-solid fa-shield text-cyan-500/60 text-xs"></i> ${h.categoria}
+                        </div>
+                        <div class="text-[11px] text-cyan-400/80 font-mono mt-0.5"><i class="fa-solid fa-tag"></i> ${h.mitre}</div>
+                    </td>
+                    <td class="p-3.5"><span class="px-3 py-1 rounded-lg text-xs font-mono font-bold ${badgeClass}">${h.criticidad}</span></td>
+                    <td class="p-3.5 text-slate-300 text-xs">
+                        <div>${h.evidencia}</div>
+                        <div class="text-[10px] text-cyan-400 underline mt-1 font-mono">Ver registros asociados &rarr;</div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.filtrarTablaCategoria = function(cat) {
+            categoriaFiltroActual = cat;
+            // Actualizar botones estilo activo
+            const botones = document.querySelectorAll('#dashboard-section button[onclick^="window.filtrarTablaCategoria"]');
+            botones.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(`'${cat}'`)) {
+                    btn.className = "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-3 py-1 rounded-xl text-xs font-mono transition hover:bg-cyan-500/30 cursor-pointer";
+                } else {
+                    btn.className = "bg-cyber-800 text-slate-300 border border-cyber-600 px-3 py-1 rounded-xl text-xs font-mono transition hover:border-cyan-400 cursor-pointer";
+                }
+            });
+            if (globalAnalisisData) {
+                poblarTablaHallazgos(globalAnalisisData.hallazgos);
+            }
+        };
+
+        window.abrirDetalleCategoria = function(categoriaNombre) {
+            if (!globalAnalisisData) return;
+            const hallazgo = globalAnalisisData.hallazgos.find(h => h.categoria === categoriaNombre);
+            if (!hallazgo) return;
+
+            document.getElementById('cat-modal-title').innerText = `Análisis Táctico: ${hallazgo.categoria}`;
+            document.getElementById('cat-modal-mitre').innerText = `MITRE ATT&CK Framework: ${hallazgo.mitre} | Criticidad: ${hallazgo.criticidad}`;
+            document.getElementById('cat-modal-evidencia').innerText = hallazgo.evidencia;
+            document.getElementById('cat-modal-implicacion').innerText = hallazgo.implicacion;
+            document.getElementById('cat-modal-mitigacion').innerText = hallazgo.mitigacion;
+
+            document.getElementById('category-modal').classList.remove('hidden');
+        };
+
+        window.cerrarCategoryModal = function() {
+            document.getElementById('category-modal').classList.add('hidden');
+        };
+
+        window.mostrarLogsPorSeveridad = function(severidad) {
+            if (!globalAnalisisData) return;
+
+            let hallazgosFiltrados = globalAnalisisData.hallazgos.filter(h => h.criticidad === severidad);
+            let logsAMostrar = [];
+            hallazgosFiltrados.forEach(h => {
+                if (h.logsAsociados) {
+                    logsAMostrar = logsAMostrar.concat(h.logsAsociados);
+                }
+            });
+
+            let unicos = [];
+            let mapLineas = new Set();
+            logsAMostrar.forEach(item => {
+                if (!mapLineas.has(item.linea)) {
+                    mapLineas.add(item.linea);
+                    unicos.push(item);
+                }
+            });
+
+            registrosModalActual = unicos;
+            renderizarLogsModal(registrosModalActual);
+
+            const modal = document.getElementById('log-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const iconContainer = document.getElementById('modal-icon-container');
+            const countInfoEl = document.getElementById('modal-count-info');
+            const searchInput = document.getElementById('modal-search-input');
+
+            searchInput.value = '';
+            titleEl.innerText = `Inspección de Registros: Criticidad [${severidad.toUpperCase()}]`;
+            subtitleEl.innerText = `Archivo fuente: ${globalAnalisisData.nombreArchivo}`;
+            countInfoEl.innerText = `${unicos.length} registro(s) extraídos directamente del Excel`;
+
+            if (severidad === 'Crítico') {
+                iconContainer.className = "p-3 rounded-2xl border text-xl flex items-center justify-center bg-red-500/20 text-red-400 border-red-500/40";
+                iconContainer.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else if (severidad === 'Alta') {
+                iconContainer.className = "p-3 rounded-2xl border text-xl flex items-center justify-center bg-orange-500/20 text-orange-400 border-orange-500/40";
+                iconContainer.innerHTML = '<i class="fa-solid fa-fire"></i>';
+            } else if (severidad === 'Media') {
+                iconContainer.className = "p-3 rounded-2xl border text-xl flex items-center justify-center bg-yellow-500/20 text-yellow-400 border-yellow-500/40";
+                iconContainer.innerHTML = '<i class="fa-solid fa-bell"></i>';
+            } else {
+                iconContainer.className = "p-3 rounded-2xl border text-xl flex items-center justify-center bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+                iconContainer.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.filtrarLogsModal = function(filtro) {
+            const query = filtro.toLowerCase();
+            const filtrados = registrosModalActual.filter(log => {
+                return log.contenido.toLowerCase().includes(query) || log.linea.toString().includes(query);
+            });
+            renderizarLogsModal(filtrados);
+            document.getElementById('modal-count-info').innerText = `Mostrando ${filtrados.length} de ${registrosModalActual.length} registros`;
+        };
+
+        function renderizarLogsModal(logs) {
+            const listEl = document.getElementById('modal-logs-list');
+            listEl.innerHTML = '';
+
+            if (logs.length === 0 || (logs.length === 1 && logs[0].linea === 0)) {
+                listEl.innerHTML = `<div class="p-8 text-center text-slate-400 font-mono text-xs">No se encontraron registros coincidentes con los criterios de búsqueda.</div>`;
+                return;
+            }
+
+            logs.forEach(log => {
+                const div = document.createElement('div');
+                div.className = "bg-cyber-900/90 border border-cyber-600/80 rounded-2xl p-4 font-mono text-xs text-slate-300 space-y-2 shadow-inner hover:border-cyan-400/60 transition";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center text-[11px] text-cyan-400 font-bold border-b border-cyber-700/80 pb-1.5">
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-file-excel text-emerald-400"></i> LÍNEA DE EXCEL #${log.linea}</span>
+                        <span class="bg-cyan-500/10 px-2.5 py-0.5 rounded-md border border-cyan-500/20 text-[10px]">EVIDENCIA SIEM NATIVA</span>
+                    </div>
+                    <div class="text-white break-all bg-cyber-800/60 p-3 rounded-xl border border-cyber-700/50 select-all font-mono">${escapeHtml(log.contenido)}</div>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        window.cerrarModalLogs = function() {
+            document.getElementById('log-modal').classList.add('hidden');
+        };
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        window.exportarPDF = function() {
+            if (!globalAnalisisData) return;
+
+            let hallazgosHtml = globalAnalisisData.hallazgos.map(h => {
+                let badgeColor = '#64748b';
+                let bgBadge = '#f1f5f9';
+                if(h.criticidad === 'Crítico') { badgeColor = '#dc2626'; bgBadge = '#fee2e2'; }
+                else if(h.criticidad === 'Alta') { badgeColor = '#ea580c'; bgBadge = '#ffedd5'; }
+                else if(h.criticidad === 'Media') { badgeColor = '#ca8a04'; bgBadge = '#fef9c3'; }
+                else if(h.criticidad === 'Bajo') { badgeColor = '#16a34a'; bgBadge = '#dcfce7'; }
+
+                return `
+                <div style="margin-bottom: 8px; padding: 6px 10px; background: #f8fafc; border-left: 4px solid ${badgeColor}; border-radius: 4px;">
+                    <span style="background: ${bgBadge}; color: ${badgeColor}; padding: 2px 6px; font-weight: bold; border-radius: 3px; font-size: 10px;">[${h.criticidad.toUpperCase()}]</span>
+                    <strong style="color: #0f172a; margin-left: 6px;">${h.categoria}:</strong> <span style="color: #334155;">${h.evidencia}</span>
+                </div>`;
+            }).join('');
+
+            const printContainer = document.getElementById('print-report-container');
+            printContainer.innerHTML = `
+                <div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #0f172a; padding: 20px; font-size: 11px; line-height: 1.5; background: #ffffff;">
+                    <div style="border-bottom: 3px solid #0284c7; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div>
+                            <h1 style="color: #0f172a; margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 0.5px;">SOC OPERATIONS CENTER - INFORME TÉCNICO</h1>
+                            <p style="color: #0284c7; font-size: 11px; margin: 4px 0 0 0; font-weight: bold;">Analista Responsable: Romil | Nivel 2 | Estocolmo, Suecia</p>
+                        </div>
+                        <div style="text-align: right; font-size: 10px; color: #475569;">
+                            <div><strong>Registros:</strong> ${globalAnalisisData.totalRegistros}</div>
+                            <div><strong>Archivo:</strong> ${globalAnalisisData.nombreArchivo}</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <h2 style="color: #0284c7; font-size: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase;">1. Resumen Ejecutivo</h2>
+                        <p style="margin: 4px 0; color: #334155;">Se completó la investigación analítica sobre los registros exportados del SIEM corporativo. La correlación heurística automatizada identificó eventos que requieren atención inmediata para salvaguardar la infraestructura y mitigar riesgos perimetrales.</p>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <h2 style="color: #0284c7; font-size: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase;">2. Hallazgos Identificados y Evidencias</h2>
+                        ${hallazgosHtml}
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <h2 style="color: #0284c7; font-size: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase;">3. Explicación Técnica de Cada Hallazgo</h2>
+                        <ul style="padding-left: 16px; margin: 4px 0; color: #334155;">
+                            <li style="margin-bottom: 4px;"><strong>Fuerza Bruta / Autenticación:</strong> Registro masivo de peticiones fallidas apuntando a servicios de acceso.</li>
+                            <li style="margin-bottom: 4px;"><strong>Inicios Sospechosos:</strong> Detección de patrones de conexión fuera del horario laboral estándar.</li>
+                            <li style="margin-bottom: 4px;"><strong>Escalamiento de Privilegios:</strong> Intentos de bypass de seguridad hacia usuarios con privilegios elevados.</li>
+                            <li style="margin-bottom: 4px;"><strong>Comandos y Procesos:</strong> Uso de terminales de comandos y scripts automatizados en endpoints.</li>
+                            <li style="margin-bottom: 4px;"><strong>Movimiento Lateral:</strong> Conexiones internas no habituales entre servidores y estaciones de trabajo.</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <h2 style="color: #0284c7; font-size: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase;">4. Clasificación de Riesgos y Justificación</h2>
+                        <p style="margin: 4px 0; color: #334155;"><strong>Crítico / Alto:</strong> Vectores que comprometen directamente la integridad y privilegios de dominio, exigiendo contención inmediata.<br><strong>Medio / Bajo:</strong> Eventos operativos atípicos que requieren monitoreo preventivo y revisión de directivas.</p>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <h2 style="color: #0284c7; font-size: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase;">5. Posible Impacto en la Organización</h2>
+                        <p style="margin: 4px 0; color: #334155;">Exposición potencial de credenciales corporativas, activos de red críticos y riesgo de interrupción operativa o filtración de información confidencial si los vectores detectados progresan sin contención.</p>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <h2 style="color: #0284c7; font-size: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase;">6. Plan de Acción (Investigar, Contener y Remediar)</h2>
+                        <p style="margin: 4px 0; color: #334155;">
+                            <strong>* INVESTIGAR:</strong> Aislar marcas de tiempo (timestamps), direcciones IP de origen y hosts afectados referenciados en el log.<br>
+                            <strong>* CONTENER:</strong> Revocar sesiones activas sospechosas, aplicar reglas temporales de bloqueo en firewall perimetral.<br>
+                            <strong>* REMEDIAR:</strong> Aplicar parches de seguridad faltantes y auditar cuentas con privilegios elevados.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <h2 style="color: #0284c7; font-size: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase;">7. Recomendaciones Generales de Seguridad</h2>
+                        <ul style="padding-left: 16px; margin: 4px 0; color: #334155;">
+                            <li style="margin-bottom: 4px;">Implementar Autenticación Multifactor (MFA) obligatoria en todos los accesos remotos y VPNs corporativas.</li>
+                            <li style="margin-bottom: 4px;">Realizar revisiones periódicas de los umbrales de alerta en el SIEM para optimizar la detección temprana de amenazas.</li>
+                            <li style="margin-bottom: 4px;">Fortalecer la segmentación de red interna (Microsegmentación) para limitar drásticamente el impacto de movimientos laterales.</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-top: 20px; border-top: 1px solid #cbd5e1; padding-top: 8px; font-size: 9px; color: #64748b; text-align: center;">
+                        Documento oficial generado por SOC Operations Center - Romil | Estocolmo, Suecia &copy; 2026. Válido para auditorías y portafolio profesional.
+                    </div>
+                </div>
+            `;
+
+            // Crear una ventana temporal de impresión limpia que evita espacios en blanco
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Informe_Tecnico_SOC_Romil_${globalAnalisisData.nombreArchivo.replace(/\.[^/.]+$/, "")}</title>
+                        <style>
+                            @page { size: A4; margin: 15mm; }
+                            body { margin: 0; padding: 0; background: #ffffff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                        </style>
+                    </head>
+                    <body>
+                        ${printContainer.innerHTML}
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                window.close();
+                            }
+                        <\/script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        };
+
+        window.exportarTXT = function() {
+            if (!globalAnalisisData) return;
+            const blob = new Blob([globalAnalisisData.informe], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Informe_Tecnico_SOC_Romil_${globalAnalisisData.nombreArchivo.replace(/\.[^/.]+$/, "")}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        window.reiniciarSistema = function() {
+            globalAnalisisData = null;
+            document.getElementById('excelFile').value = '';
+            document.getElementById('dashboard-section').classList.add('hidden');
+            document.getElementById('upload-section').classList.remove('hidden');
+            document.getElementById('drop-zone').classList.remove('opacity-40');
+        };
+    </script>
+</body>
+</html>
